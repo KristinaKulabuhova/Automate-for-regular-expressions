@@ -31,6 +31,7 @@ bool equal_automate(Automate first, Automate second) {
             }
         }
     }
+    return true;
 }
     
 bool Test_concatenation()
