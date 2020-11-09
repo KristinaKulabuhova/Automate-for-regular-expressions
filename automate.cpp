@@ -36,6 +36,17 @@ Automate::Automate(const char symbol)
     term_idx = 1;
 }
 
+ Automate::Automate(size_t n, size_t idx, Verts other)
+    {
+        auto other_it = other.begin();
+        for (; other_it != other.end(); ++other_it)
+        {
+            this->vertices.push_back(*other_it);
+        }
+        this->n_vertices = n;
+        this->term_idx = idx;
+    }
+
 Automate::~Automate() = default;
 
 Automate &Automate::operator+=(Automate &other)
@@ -102,14 +113,15 @@ Automate &Automate::operator+=(size_t n)
             }
         }
     }
-
+    term_idx += n;
     return *this;
 }
 size_t Automate::get_terminal()
 {
     return term_idx;
 }
-
+//--------------------------------------------------------------------------
+//--------------------------------------------------------------------------
 std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate)
 {
     size_t size = automate.get_number_of_vertices();

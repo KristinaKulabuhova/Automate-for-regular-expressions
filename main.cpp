@@ -3,6 +3,7 @@
 #include <iterator>
 #include "test.h"
 #include "automate.h"
+#include "automate_builder.h"
 
 struct BeenData
 {
@@ -29,54 +30,97 @@ public:
     }
 };
 
-void allGood(Automate automate, char symbol, int k, int vert, int eps, int max_eps, int end_vert, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
+bool can_get_terminate_eps(Automate automate, int vert, int finish_vertex, std::unordered_set<int> &been_to_eps) 
+{
+    auto it = automate.vertices.begin();
+    std::advance(it, static_cast<size_t>(vert));   
+
+    bool can_get = false;
+
+    for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
+        {
+            if (map_it->first == 'e')
+            {
+                for (auto &el : map_it->second)
+                {
+                    if (el == finish_vertex) 
+                        return true;
+                    
+                    
+
+                    if (!been_to_eps.contains(el))
+                    {
+                        been_to_eps.insert(el);
+                        can_get = can_get_terminate_eps(automate, el, finish_vertex, been_to_eps);
+                    }
+                }
+                break;
+            }
+        }
+    return can_get;
+}
+
+
+void allGood(Automate automate, char symbol, int k, int vert, int eps, int max_eps, int finish_vertex, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
 {
     if (k == 0)
     {
-        if (vert == end_vert)
+        if (vert == finish_vertex)
         {
             good_vert.insert(vert);
+        } 
+        else 
+        {
+            std::unordered_set<int> been_to_eps;
+            if (can_get_terminate_eps(automate, vert, finish_vertex, been_to_eps))
+            {
+                good_vert.insert(vert);
+            }
         }
         been.insert(BeenData(k, vert, eps));
-        return;
-    }
-
-    auto it = automate.vertices.begin();
-    std::advance(it, static_cast<size_t>(vert));
-
-    for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
+        //return;
+    } 
+    else 
     {
-        if (map_it->first == 'c' && eps + 1 < max_eps)
+        auto it = automate.vertices.begin();
+        std::advance(it, static_cast<size_t>(vert));
+
+        for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
         {
-            for (auto &el : map_it->second)
+            if (map_it->first == 'e' && eps + 1 < max_eps)
             {
-                if (!been.contains(BeenData(k, el, eps + 1)))
+                for (auto &el : map_it->second)
                 {
-                    been.insert({k, el, eps + 1});
-                    allGood(automate, symbol, k, el, eps + 1, max_eps, end_vert, good_vert, been);
+                    if (!been.contains(BeenData(k, el, eps + 1)))
+                    {
+                        been.insert({k, el, eps + 1});
+                        allGood(automate, symbol, k, el, eps + 1, max_eps, finish_vertex, good_vert, been);
+                    }
                 }
             }
-        }
 
-        if (map_it->first == symbol)
-        {
-            for (auto &el : map_it->second)
+            if (map_it->first == symbol)
             {
-                if (!been.contains(BeenData(k - 1, el, eps)))
+                for (auto &el : map_it->second)
                 {
-                    been.insert({k, el, eps + 1});
-                    allGood(automate, symbol, k - 1, el, 0, max_eps, end_vert, good_vert, been);
+                    if (!been.contains(BeenData(k - 1, el, eps)))
+                    {
+                        been.insert({k, el, eps + 1});
+                        allGood(automate, symbol, k - 1, el, 0, max_eps, finish_vertex, good_vert, been);
+                    }
                 }
             }
         }
     }
+
+
 }
 
-bool canGetPrefix(int n, int cur, Automate automate, int max_eps, char symbol, int end_vert)
+bool canGetPrefix(int n, int cur, Automate automate, int max_eps, char symbol, int finish_vertex)
 {
     std::unordered_set<int> good_vert;
     std::unordered_set<BeenData, Hash> been;
-    allGood(automate, symbol, n, cur, 0, max_eps, end_vert, good_vert, been);
+    allGood(automate, symbol, n, cur, 0, max_eps, finish_vertex, good_vert, been);
 
     return good_vert.size() != 0;
 }
@@ -200,6 +244,19 @@ int main()
     }
     else
     {
+        for (const auto& v : answer_vertices)
+        {
+            std::cout << v << ' ';
+        }
+    }
+
+/*
+    if (answer_vertices.size() == 0)
+    {
+        std::cout << "INF" << "\n";
+    }
+    else
+    {
         std::vector<std::vector<int>> dijkstra_automate = prepare_for_dijkstra(automate);
         std::vector<int> distance = dijkstra(finish_vertex + 1, 0, dijkstra_automate);
         std::vector<int> all_distance;
@@ -219,4 +276,5 @@ int main()
         std::cout << min << "\n";
     }
     Test();
+*/
 }

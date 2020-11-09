@@ -1,3 +1,6 @@
+#ifndef TEST_H
+#define TEST_H
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -124,10 +127,10 @@ bool Test_operator_plus()
     first += 2;
 
     Verts answer = {
-         {{'a', {2}}},
-         {{'e', {3}}}};
+         {{'a', {3}}},
+         {{'e', {}}}};
     size_t n_vertices = 2;
-    size_t term_idx = 1 + 2;
+    size_t term_idx = 3;
 
     Automate result(n_vertices, term_idx, answer);
 
@@ -136,8 +139,8 @@ bool Test_operator_plus()
 
 bool Test_IsCorrectRegularExpression()
 {
-    std::string regular_one = "";
-    std::string regular_two = "acb..bab.c.*.ab.ba.+.+*a.";
+    std::string regular_one = "bc+c.aba.*.bac.+.+*";
+    std::string regular_two = "acb...bab.c.*.ab.ba.+.+*a.";
     std::string regular_three = "acb-.bab.c.*.ab.ba.+.+*a.";
     std::string regular_four = "+acbg..bab.c.*.ab.ba.+.+*a.";
     std::string regular_five = "+acb..baba.c.*.ab.ba.+.+*a.";
@@ -164,3 +167,5 @@ bool Test_mergeVertices()
     Automate answer(2, 1, answer_list);
     return equal_automate(answer, one);
 }
+
+#endif
