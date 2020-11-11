@@ -147,61 +147,47 @@ size_t Automate::get_terminal()
 }
 //--------------------------------------------------------------------------
 //--------------------------------------------------------------------------
-// std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate)
-// {
-//     size_t size = automate.get_number_of_vertices();
-//     std::vector<std::vector<int>> adjacency_matrix(size, std::vector<int>(size, 0));
+std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate)
+{
+    size_t size = automate.get_number_of_vertices();
+    std::vector<std::vector<int>> adjacency_matrix(size, std::vector<int>(size, 0));
 
-//     auto it = automate.vertices.begin();
+    auto it = automate.vertices.begin();
 
-//     for (int i = 0; i < size; ++i)
-//     {
-//         for (auto &[key, value] : *it)
-//         {
-//             if (key != 'e')
-//             {
-//                 for (auto &idx : value)
-//                 {
-//                     adjacency_matrix[i][idx] = 1;
-//                 }
-//             }
-//         }
-//         ++it;
-//     }
-//     return adjacency_matrix;
-// }
+    for (int i = 0; i < size; ++i)
+    {
+        for (auto &[key, value] : *it)
+        {
+            if (key != 'e')
+            {
+                for (auto &idx : value)
+                {
+                    adjacency_matrix[i][idx] = 1;
+                }
+            }
+        }
+        ++it;
+    }
+    return adjacency_matrix;
+}
 
-// std::vector<int> dijkstra(int n_verts, int start, std::vector<std::vector<int>> matrix)
-// {
-//     std::vector<bool> valid(n_verts, true);
-//     std::vector<int> weight(n_verts, INT32_MAX - 1);
+struct edge{
+    size_t begin;
+    size_t end;
+    size_t cost;
+};
 
-//     weight[start] = 0;
-
-//     for (int i = 0; i < n_verts; ++i)
-//     {
-//         int id = -1;
-//         int min_weight = INT32_MAX;
-
-//         for (int j = 0; j < n_verts; ++j)
-//         {
-//             if (valid[j] && weight[j] < min_weight)
-//             {
-//                 min_weight = weight[j];
-//                 id = j;
-//             }
-//         }
-
-//         for (int j = 0; j < n_verts; ++j)
-//         {
-//             if (weight[id] + matrix[id][j] < weight[j])
-//             {
-//                 weight[j] = weight[id] + matrix[id][j];
-//             }
-//         }
-//         valid[id] = false;
-//     }
-
-//     return weight;
-// }
-
+std::vector<size_t> solve(int n_vertices, int n_edges, int start, std::vector<edge> edges)
+{
+    const int INF = 1000000000;
+    std::vector<size_t> dist(n_vertices, INF);
+    dist[start] = 0;
+    for(int i = 0; i < n_vertices - 1; ++i)
+    {
+        for (int j = 0; j < n_edges; ++j)
+        {
+            dist[edges[j].end] = std::min(dist[edges[j].end], dist[edges[j].begin] + edges[j].cost);
+        }
+    }
+    return dist;
+}

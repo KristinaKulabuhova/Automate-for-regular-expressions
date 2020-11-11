@@ -63,7 +63,6 @@ bool can_get_terminate_eps(Automate automate, int vert, int finish_vertex, std::
 
 void allGood(Automate automate, char symbol, int k, int vert, int finish_vertex, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
 {
-    //been.insert({k, el});
     if (k == 0)
     {
         if (vert == finish_vertex)
@@ -112,7 +111,6 @@ void allGood(Automate automate, char symbol, int k, int vert, int finish_vertex,
             }
         }
     }
-
 
 }
 
@@ -219,26 +217,7 @@ struct edge{
     size_t cost;
 };
 
-std::vector<edge> Create_struct_of_edges(Automate automate) {
-    std::vector<edge> edges;
-    int i = 0;
-    size_t cost;
-    for (auto it = automate.vertices.begin(); it != automate.vertices.end(); ++it, ++i)
-    {
-        for (auto &[key, value] : *it)
-        {
-            cost = (key == 'e') ? 0 : 1;
-            for (size_t &idx : value)
-            {
-                edges.push_back({i, idx, cost});
-            }
-        }
-    }
-    return edges;
-}
-
-
-std::vector<size_t> solve(int n_vertices, int n_edges, int start, std::vector<edge> edges)
+void solve(int n_vertices, int n_edges, int start, std::vector<edge> edges, std::vector<size_t> answer_vertices, int k)
 {
     const int INF = 1000000000;
     std::vector<size_t> dist(n_vertices, INF);
@@ -250,19 +229,33 @@ std::vector<size_t> solve(int n_vertices, int n_edges, int start, std::vector<ed
             dist[edges[j].end] = std::min(dist[edges[j].end], dist[edges[j].begin] + edges[j].cost);
         }
     }
-    return dist;
+
+    int min = INT32_MAX;
+    for (int i = 0; i < answer_vertices.size(); ++i)
+    {
+        if (dist[answer_vertices[i]] < min)
+        {
+            min = dist[answer_vertices[i]];
+        }
+    }
+    std::cout << min + k << "\n";
 }
 
-int main()
+std::vector<size_t> good_vertices(Automate automate, int k, char x, int finish_vertex)
 {
-    int k = 0;
-    char x = 0;
-    std::string expression;
-    std::cin >> expression;
-    if (!IsCorrectRegularExpression(expression))
+    std::vector<size_t> answer_vertices;
+    for (int i = 0; i < finish_vertex + 1; ++i)
     {
-        throw IncorrectRegularExpression();
+        if (canGetPrefix(k, i, automate, finish_vertex + 1, x, finish_vertex))
+        {
+            answer_vertices.push_back(i);
+        }
     }
+    return answer_vertices;
+}
+
+Automate build_automate(std::string expression)
+{
     AutomateBuilder builder;
     for (int i = 0; i < expression.size(); ++i)
     {
@@ -295,59 +288,56 @@ int main()
         }
     }
 
-    auto automate = builder.top();
+    return builder.top();
+}
+
+std::vector<edge> create_struct_of_edges(Automate automate) {
+    std::vector<edge> edges;
+    int i = 0;
+    size_t cost;
+    for (auto it = automate.vertices.begin(); it != automate.vertices.end(); ++it, ++i)
+    {
+        for (auto &[key, value] : *it)
+        {
+            cost = (key == 'e') ? 0 : 1;
+            for (size_t &idx : value)
+            {
+                edges.push_back({i, idx, cost});
+            }
+        }
+    }
+    return edges;
+}
+
+int main()
+{
+    int k = 0;
+    char x = 0;
+    std::string expression;
+    std::cin >> expression;
+    std::cin >> x >> k;
+
+    if (!IsCorrectRegularExpression(expression))
+    {
+        throw IncorrectRegularExpression();
+    }
+
+    Automate automate = build_automate(expression);
     int finish_vertex = automate.get_terminal();
 
-    Automate invert_automate = automate.invert();
+    //Automate invert_automate = automate.invert();
     //dump(invert_automate);
     dump(automate);
 
-    std::cin >> x >> k;
-    std::vector<size_t> answer_vertices;
-    for (int i = 0; i < finish_vertex + 1; ++i)
-    {
-        if (canGetPrefix(k, i, automate, finish_vertex + 1, x, finish_vertex))
-        {
-            answer_vertices.push_back(i);
-        }
-    }
+    std::vector<size_t> answer_vertices = good_vertices(automate, k, x, finish_vertex);
 
     if (answer_vertices.size() == 0)
     {
         std::cout << "INF" << "\n";
     }
-    else {
-        std::vector<edge> edges = Create_struct_of_edges(automate);
-        std::vector<size_t> dist = solve(finish_vertex + 1, edges.size(), 0, edges);
-        int min = INT32_MAX;
-        for (int i = 0; i < answer_vertices.size(); ++i)
-        {
-            if (dist[answer_vertices[i]] < min)
-            {
-                min = dist[answer_vertices[i]];
-            }
-        }
-        std::cout << min + k << "\n";
+    else 
+    {
+        std::vector<edge> edges = create_struct_of_edges(automate);
+        solve(finish_vertex + 1, edges.size(), 0, edges, answer_vertices, k);
     }
-    // else
-    // {
-    //     std::vector<std::vector<int>> dijkstra_automate = prepare_for_dijkstra(automate);
-    //     std::vector<int> distance = dijkstra(finish_vertex + 1, 0, dijkstra_automate);
-    //     std::vector<int> all_distance;
-    //     all_distance.reserve(answer_vertices.size());
-    //     for (int j = 0; j < answer_vertices.size(); ++j)
-    //     {
-    //         std::vector<int> dist = dijkstra(finish_vertex + 1, j, dijkstra_automate);
-    //         all_distance[j] = dist[finish_vertex];
-    //     }
-    //     size_t min = 10000;
-    //     for (int l = 0; l < answer_vertices.size(); ++l)
-    //     {
-    //         if (all_distance[l] + k < min)
-    //         {
-    //             min = all_distance[l] + k;
-    //         }
-    //     }
-    //     std::cout << min << "\n";
-    //}
 }
