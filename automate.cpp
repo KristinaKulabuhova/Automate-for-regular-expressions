@@ -46,6 +46,31 @@ Automate::Automate(size_t n, size_t idx, Verts other)
     this->n_vertices = n;
     this->term_idx = idx;
 }
+Automate::Automate(const Automate& other) : vertices(other.vertices), n_vertices(other.n_vertices), term_idx(other.term_idx){}
+
+Automate Automate::invert() 
+{
+    std::vector<std::unordered_map<char, std::list<size_t>>> new_vector(this->vertices.size());
+    auto new_it = new_vector.begin();
+    int i = 0;
+    for (auto it = this->vertices.begin(); it != this->vertices.end(); ++it, ++new_it, ++i)
+    {
+        for (auto &[key, value] : *it)
+        {
+            for (auto &idx : value)
+            {
+                new_vector[idx][key].push_back(i);
+            }
+        }
+    }
+    std::list<std::unordered_map<char, std::list<size_t>>> new_list;
+    for (int i = 0; i < new_vector.size(); ++i)
+    {
+        new_list.push_back(new_vector[i]);
+    }
+    Automate new_automate(this->n_vertices, this->term_idx, new_list);
+    return new_automate;
+}
 
 Automate::~Automate() = default;
 

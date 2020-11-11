@@ -83,7 +83,7 @@ void allGood(Automate automate, char symbol, int k, int vert, int eps, int max_e
     } 
     else 
     {
-        auto it = automate.vertices.begin();
+        auto it = automate.vertices.end();
         std::advance(it, static_cast<size_t>(vert));
 
         for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
@@ -258,8 +258,8 @@ int main()
 
     auto automate = builder.top();
     int finish_vertex = automate.get_terminal();
-    dump(automate);
-
+    Automate invert_automate = automate.invert();
+    dump(invert_automate);
     std::cin >> x >> k;
     std::vector<size_t> answer_vertices;
     for (int i = 0; i < finish_vertex + 1; ++i)
