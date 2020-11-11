@@ -36,16 +36,16 @@ Automate::Automate(const char symbol)
     term_idx = 1;
 }
 
- Automate::Automate(size_t n, size_t idx, Verts other)
+Automate::Automate(size_t n, size_t idx, Verts other)
+{
+    auto other_it = other.begin();
+    for (; other_it != other.end(); ++other_it)
     {
-        auto other_it = other.begin();
-        for (; other_it != other.end(); ++other_it)
-        {
-            this->vertices.push_back(*other_it);
-        }
-        this->n_vertices = n;
-        this->term_idx = idx;
+        this->vertices.push_back(*other_it);
     }
+    this->n_vertices = n;
+    this->term_idx = idx;
+}
 
 Automate::~Automate() = default;
 
@@ -125,7 +125,7 @@ size_t Automate::get_terminal()
 std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate)
 {
     size_t size = automate.get_number_of_vertices();
-    std::vector<std::vector<int>> adjacency_matrix(size);
+    std::vector<std::vector<int>> adjacency_matrix(size, std::vector<int>(size, 0));
 
     auto it = automate.vertices.begin();
 
@@ -133,14 +133,7 @@ std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate)
     {
         for (auto &[key, value] : *it)
         {
-            if (key == 'e')
-            {
-                for (auto &idx : value)
-                {
-                    adjacency_matrix[i][idx] = 0;
-                }
-            }
-            else
+            if (key != 'e')
             {
                 for (auto &idx : value)
                 {
@@ -148,6 +141,7 @@ std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate)
                 }
             }
         }
+        ++it;
     }
     return adjacency_matrix;
 }
@@ -161,23 +155,23 @@ std::vector<int> dijkstra(int n_verts, int start, std::vector<std::vector<int>> 
 
     for (int i = 0; i < n_verts; ++i)
     {
-        int min_weight = INT32_MAX;
         int id = -1;
+        int min_weight = INT32_MAX;
 
         for (int j = 0; j < n_verts; ++j)
         {
-            if (valid[j] && weight[i] < min_weight)
+            if (valid[j] && weight[j] < min_weight)
             {
-                min_weight = weight[i];
-                id = i;
+                min_weight = weight[j];
+                id = j;
             }
         }
 
         for (int j = 0; j < n_verts; ++j)
         {
-            if (weight[id] + matrix[id][i] < weight[i])
+            if (weight[id] + matrix[id][j] < weight[j])
             {
-                weight[i] = weight[id] + matrix[id][i];
+                weight[j] = weight[id] + matrix[id][j];
             }
         }
         valid[id] = false;

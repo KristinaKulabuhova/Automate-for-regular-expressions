@@ -2,7 +2,7 @@
 #define AUTOMATE_BUILDER_H
 
 #include<stack>
-#include"automate.h"
+#include "automate.h"
 
 class AutomateBuilder
 {

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_set>
 #include <iterator>
+#include <fstream>
 #include "test.h"
 #include "automate.h"
 #include "automate_builder.h"
@@ -125,7 +126,8 @@ bool canGetPrefix(int n, int cur, Automate automate, int max_eps, char symbol, i
     return good_vert.size() != 0;
 }
 
-void Test() {
+void Test() 
+{
     
     if (Test_concatenation())
     {
@@ -184,6 +186,34 @@ void Test() {
     }
 }
 
+void dump(Automate automate) 
+{
+    std::ofstream out("dump.dot");
+    out << "digraph {\n";
+    out << "rankdir=\"LR\";\n";
+
+    auto it = automate.vertices.begin();
+    for (int i = 0; it != automate.vertices.end(); ++it, ++i)
+    {
+        out << "node" << i << "[label=\"" << i << "\"];\n";
+    }
+
+    it = automate.vertices.begin();
+
+    for (int i = 0; it != automate.vertices.end(); ++it, ++i)
+    {
+        for (auto &[key, value] : *it)
+        {
+            for (auto &idx : value)
+            {
+                out << "node" << i << " -> node" << idx << "[label=\"" << key << "\"];\n";
+            }
+        }
+    }
+    out << "}\n";
+    out.close();
+}
+
 int main()
 {
     int k = 0;
@@ -228,6 +258,8 @@ int main()
 
     auto automate = builder.top();
     int finish_vertex = automate.get_terminal();
+    dump(automate);
+
     std::cin >> x >> k;
     std::vector<size_t> answer_vertices;
     for (int i = 0; i < finish_vertex + 1; ++i)
@@ -244,26 +276,14 @@ int main()
     }
     else
     {
-        for (const auto& v : answer_vertices)
-        {
-            std::cout << v << ' ';
-        }
-    }
-
-/*
-    if (answer_vertices.size() == 0)
-    {
-        std::cout << "INF" << "\n";
-    }
-    else
-    {
         std::vector<std::vector<int>> dijkstra_automate = prepare_for_dijkstra(automate);
         std::vector<int> distance = dijkstra(finish_vertex + 1, 0, dijkstra_automate);
         std::vector<int> all_distance;
+        all_distance.reserve(answer_vertices.size());
         for (int j = 0; j < answer_vertices.size(); ++j)
         {
             std::vector<int> dist = dijkstra(finish_vertex + 1, j, dijkstra_automate);
-            all_distance.push_back(dist[finish_vertex]);
+            all_distance[j] = dist[finish_vertex];
         }
         size_t min = 10000;
         for (int l = 0; l < answer_vertices.size(); ++l)
@@ -276,5 +296,4 @@ int main()
         std::cout << min << "\n";
     }
     Test();
-*/
 }

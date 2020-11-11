@@ -12,9 +12,9 @@ void AutomateBuilder::concatenate()
     automates.pop();
     auto second = automates.top();
     automates.pop();
-    first.concatenation(second);
+    second.concatenation(first);
 
-    automates.push(first);
+    automates.push(second);
 }
 
 void AutomateBuilder::unificate()
@@ -23,9 +23,9 @@ void AutomateBuilder::unificate()
     automates.pop();
     auto second = automates.top();
     automates.pop();
-    first += second;
+    second += first;
 
-    automates.push(first);
+    automates.push(second);
 }
 
 void AutomateBuilder::closure()
