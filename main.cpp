@@ -213,6 +213,46 @@ void dump(Automate automate)
     out.close();
 }
 
+struct edge{
+    size_t begin;
+    size_t end;
+    size_t cost;
+};
+
+std::vector<edge> Create_struct_of_edges(Automate automate) {
+    std::vector<edge> edges;
+    int i = 0;
+    size_t cost;
+    for (auto it = automate.vertices.begin(); it != automate.vertices.end(); ++it, ++i)
+    {
+        for (auto &[key, value] : *it)
+        {
+            cost = (key == 'e') ? 0 : 1;
+            for (size_t &idx : value)
+            {
+                edges.push_back({i, idx, cost});
+            }
+        }
+    }
+    return edges;
+}
+
+
+std::vector<size_t> solve(int n_vertices, int n_edges, int start, std::vector<edge> edges)
+{
+    const int INF = 1000000000;
+    std::vector<size_t> dist(n_vertices, INF);
+    dist[start] = 0;
+    for(int i = 0; i < n_vertices - 1; ++i)
+    {
+        for (int j = 0; j < n_edges; ++j)
+        {
+            dist[edges[j].end] = std::min(dist[edges[j].end], dist[edges[j].begin] + edges[j].cost);
+        }
+    }
+    return dist;
+}
+
 int main()
 {
     int k = 0;
@@ -276,26 +316,38 @@ int main()
     {
         std::cout << "INF" << "\n";
     }
-    else
-    {
-        std::vector<std::vector<int>> dijkstra_automate = prepare_for_dijkstra(automate);
-        std::vector<int> distance = dijkstra(finish_vertex + 1, 0, dijkstra_automate);
-        std::vector<int> all_distance;
-        all_distance.reserve(answer_vertices.size());
-        for (int j = 0; j < answer_vertices.size(); ++j)
+    else {
+        std::vector<edge> edges = Create_struct_of_edges(automate);
+        std::vector<size_t> dist = solve(finish_vertex + 1, edges.size(), 0, edges);
+        int min = INT32_MAX;
+        for (int i = 0; i < answer_vertices.size(); ++i)
         {
-            std::vector<int> dist = dijkstra(finish_vertex + 1, j, dijkstra_automate);
-            all_distance[j] = dist[finish_vertex];
-        }
-        size_t min = 10000;
-        for (int l = 0; l < answer_vertices.size(); ++l)
-        {
-            if (all_distance[l] + k < min)
+            if (dist[answer_vertices[i]] < min)
             {
-                min = all_distance[l] + k;
+                min = dist[answer_vertices[i]];
             }
         }
-        std::cout << min << "\n";
+        std::cout << min + k << "\n";
     }
-    Test();
+    // else
+    // {
+    //     std::vector<std::vector<int>> dijkstra_automate = prepare_for_dijkstra(automate);
+    //     std::vector<int> distance = dijkstra(finish_vertex + 1, 0, dijkstra_automate);
+    //     std::vector<int> all_distance;
+    //     all_distance.reserve(answer_vertices.size());
+    //     for (int j = 0; j < answer_vertices.size(); ++j)
+    //     {
+    //         std::vector<int> dist = dijkstra(finish_vertex + 1, j, dijkstra_automate);
+    //         all_distance[j] = dist[finish_vertex];
+    //     }
+    //     size_t min = 10000;
+    //     for (int l = 0; l < answer_vertices.size(); ++l)
+    //     {
+    //         if (all_distance[l] + k < min)
+    //         {
+    //             min = all_distance[l] + k;
+    //         }
+    //     }
+    //     std::cout << min << "\n";
+    //}
 }
