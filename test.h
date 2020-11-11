@@ -8,7 +8,7 @@
 #include <list>
 #include <unordered_map>
 #include <stack>
-#include "automate.h"
+#include "solve.h"
 
 bool equal_automate(Automate first, Automate second) {
     auto ans_it = first.vertices.begin();
@@ -166,6 +166,29 @@ bool Test_mergeVertices()
          {{'e', {}}}};
     Automate answer(2, 1, answer_list);
     return equal_automate(answer, one);
+}
+
+bool Solve()
+{
+    struct test
+    {
+        std::string expression;
+        char x;
+        size_t k;
+        size_t res;
+    };
+    
+    std::vector<test> all_tests;
+    all_tests[0] = {"ac.aa.", 'a', 2, 2};
+    all_tests[1] = {"acb..bab.c.*.ab.ba.+.+*a.", 'a', 2, 4};
+    all_tests[2] = {"ab+", 'c', 1, 0};
+    for (int i = 0; i < all_tests.size(); ++i)
+    {
+        if (Answer(all_tests[i].expression, all_tests[i].x, all_tests[i].k) != all_tests[i].res)
+        {
+            return false;
+        }
+    }
 }
 
 #endif

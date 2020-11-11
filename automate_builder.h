@@ -1,7 +1,6 @@
 #ifndef AUTOMATE_BUILDER_H
 #define AUTOMATE_BUILDER_H
 
-#include<stack>
 #include "automate.h"
 
 class AutomateBuilder
