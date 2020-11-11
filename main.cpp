@@ -10,16 +10,15 @@ struct BeenData
 {
     int x;
     int vert;
-    int eps;
 
     BeenData() = default;
-    BeenData(int x, int vert, int eps) : x(x), vert(vert), eps(eps) {}
+    BeenData(int x, int vert) : x(x), vert(vert) {}
 
 };
 
 bool operator==(const BeenData& first, const BeenData &second)
 {
-    return first.x == second.x && first.vert == second.vert && first.eps == second.eps;
+    return first.x == second.x && first.vert == second.vert;
 }
 
 class Hash
@@ -27,7 +26,7 @@ class Hash
 public:
     size_t operator()(const BeenData &value) const
     {
-        return value.x + value.vert + value.eps;
+        return value.x + value.vert;
     }
 };
 
@@ -62,8 +61,9 @@ bool can_get_terminate_eps(Automate automate, int vert, int finish_vertex, std::
 }
 
 
-void allGood(Automate automate, char symbol, int k, int vert, int eps, int max_eps, int finish_vertex, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
+void allGood(Automate automate, char symbol, int k, int vert, int finish_vertex, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
 {
+    //been.insert({k, el});
     if (k == 0)
     {
         if (vert == finish_vertex)
@@ -78,24 +78,23 @@ void allGood(Automate automate, char symbol, int k, int vert, int eps, int max_e
                 good_vert.insert(vert);
             }
         }
-        been.insert(BeenData(k, vert, eps));
-        //return;
+        been.insert(BeenData(k, vert));
     } 
     else 
     {
-        auto it = automate.vertices.end();
+        auto it = automate.vertices.begin();
         std::advance(it, static_cast<size_t>(vert));
 
         for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
         {
-            if (map_it->first == 'e' && eps + 1 < max_eps)
+            if (map_it->first == 'e')
             {
                 for (auto &el : map_it->second)
                 {
-                    if (!been.contains(BeenData(k, el, eps + 1)))
+                    if (!been.contains(BeenData(k, el)))
                     {
-                        been.insert({k, el, eps + 1});
-                        allGood(automate, symbol, k, el, eps + 1, max_eps, finish_vertex, good_vert, been);
+                        been.insert({k, el});
+                        allGood(automate, symbol, k, el, finish_vertex, good_vert, been);
                     }
                 }
             }
@@ -104,10 +103,10 @@ void allGood(Automate automate, char symbol, int k, int vert, int eps, int max_e
             {
                 for (auto &el : map_it->second)
                 {
-                    if (!been.contains(BeenData(k - 1, el, eps)))
+                    if (!been.contains(BeenData(k - 1, el)))
                     {
-                        been.insert({k, el, eps + 1});
-                        allGood(automate, symbol, k - 1, el, 0, max_eps, finish_vertex, good_vert, been);
+                        been.insert({k, el});
+                        allGood(automate, symbol, k - 1, el, finish_vertex, good_vert, been);
                     }
                 }
             }
@@ -121,7 +120,7 @@ bool canGetPrefix(int n, int cur, Automate automate, int max_eps, char symbol, i
 {
     std::unordered_set<int> good_vert;
     std::unordered_set<BeenData, Hash> been;
-    allGood(automate, symbol, n, cur, 0, max_eps, finish_vertex, good_vert, been);
+    allGood(automate, symbol, n, cur, finish_vertex, good_vert, been);
 
     return good_vert.size() != 0;
 }
@@ -258,8 +257,11 @@ int main()
 
     auto automate = builder.top();
     int finish_vertex = automate.get_terminal();
+
     Automate invert_automate = automate.invert();
-    dump(invert_automate);
+    //dump(invert_automate);
+    dump(automate);
+
     std::cin >> x >> k;
     std::vector<size_t> answer_vertices;
     for (int i = 0; i < finish_vertex + 1; ++i)
