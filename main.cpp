@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <iterator>
 #include <fstream>
+#include <stdlib.h>
 #include "solve.h"
 #include "test.h"
 #include "automate.h"
@@ -134,6 +135,8 @@ void dump(Automate automate)
     }
     out << "}\n";
     out.close();
+    system("dot -Tpng dump.dot > dump.png");
+    system("feh dump.png");
 }
 
 int main()
@@ -157,10 +160,6 @@ int main()
     Automate automate = buildAutomate(expression);
     size_t answer = Answer(automate, x, k);
 
-    #ifdef DUMP
-    dump(automate);
-    #endif
-
     if (answer == 0)
     {
         std::cout << "INF\n";
@@ -169,4 +168,8 @@ int main()
     {
         std::cout << answer << "\n";
     }  
+
+    #ifdef DUMP
+    dump(automate);
+    #endif
 }
