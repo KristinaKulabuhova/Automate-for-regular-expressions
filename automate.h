@@ -43,7 +43,7 @@ public:
     void mergeVertices(Verts &first, Verts &second);
 
     size_t get_number_of_vertices() const;
-    size_t get_terminal();
+    size_t get_terminal() const;
 
     friend bool Test_concatenation();
     friend bool equal_automate(Automate first, Automate second);
@@ -53,8 +53,6 @@ public:
     friend bool Test_mergeVertices(Verts &first, Verts &second);
 };
 
-std::vector<int> dijkstra(int n_verts, int start, std::vector<std::vector<int>> matrix);
-std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate);
 bool IsCorrectRegularExpression(std::string regular);
 
 #endif

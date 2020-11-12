@@ -35,7 +35,6 @@ Automate::Automate(const char symbol)
     n_vertices = 2;
     term_idx = 1;
 }
-
 Automate::Automate(size_t n, size_t idx, Verts other)
 {
     auto other_it = other.begin();
@@ -47,30 +46,6 @@ Automate::Automate(size_t n, size_t idx, Verts other)
     this->term_idx = idx;
 }
 Automate::Automate(const Automate& other) : vertices(other.vertices), n_vertices(other.n_vertices), term_idx(other.term_idx){}
-
-Automate Automate::invert() 
-{
-    std::vector<std::unordered_map<char, std::list<size_t>>> new_vector(this->vertices.size());
-    auto new_it = new_vector.begin();
-    int i = 0;
-    for (auto it = this->vertices.begin(); it != this->vertices.end(); ++it, ++new_it, ++i)
-    {
-        for (auto &[key, value] : *it)
-        {
-            for (auto &idx : value)
-            {
-                new_vector[idx][key].push_back(i);
-            }
-        }
-    }
-    std::list<std::unordered_map<char, std::list<size_t>>> new_list;
-    for (int i = 0; i < new_vector.size(); ++i)
-    {
-        new_list.push_back(new_vector[i]);
-    }
-    Automate new_automate(this->n_vertices, this->term_idx, new_list);
-    return new_automate;
-}
 
 Automate::~Automate() = default;
 
@@ -121,11 +96,6 @@ void Automate::mergeVertices(Verts &first, Verts &second)
     }
 }
 
-size_t Automate::get_number_of_vertices() const
-{
-    return vertices.size();
-}
-
 Automate &Automate::operator+=(size_t n)
 {
     for (auto &el : vertices)
@@ -141,53 +111,13 @@ Automate &Automate::operator+=(size_t n)
     term_idx += n;
     return *this;
 }
-size_t Automate::get_terminal()
+
+size_t Automate::get_terminal() const
 {
     return term_idx;
 }
-//--------------------------------------------------------------------------
-//--------------------------------------------------------------------------
-std::vector<std::vector<int>> prepare_for_dijkstra(const Automate &automate)
+
+size_t Automate::get_number_of_vertices() const
 {
-    size_t size = automate.get_number_of_vertices();
-    std::vector<std::vector<int>> adjacency_matrix(size, std::vector<int>(size, 0));
-
-    auto it = automate.vertices.begin();
-
-    for (int i = 0; i < size; ++i)
-    {
-        for (auto &[key, value] : *it)
-        {
-            if (key != 'e')
-            {
-                for (auto &idx : value)
-                {
-                    adjacency_matrix[i][idx] = 1;
-                }
-            }
-        }
-        ++it;
-    }
-    return adjacency_matrix;
-}
-
-struct edge{
-    size_t begin;
-    size_t end;
-    size_t cost;
-};
-
-std::vector<size_t> solve(int n_vertices, int n_edges, int start, std::vector<edge> edges)
-{
-    const int INF = 1000000000;
-    std::vector<size_t> dist(n_vertices, INF);
-    dist[start] = 0;
-    for(int i = 0; i < n_vertices - 1; ++i)
-    {
-        for (int j = 0; j < n_edges; ++j)
-        {
-            dist[edges[j].end] = std::min(dist[edges[j].end], dist[edges[j].begin] + edges[j].cost);
-        }
-    }
-    return dist;
+    return this->get_terminal() + 1;
 }

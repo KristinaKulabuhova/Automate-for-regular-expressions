@@ -65,6 +65,38 @@ void Test()
     else {
         std::cout << "Test №7 failed\n";
     }
+
+    if (Test_Answer())
+    {
+        std::cout << "Test №8 passed\n";
+    }
+    else {
+        std::cout << "Test №8 failed\n";
+    }
+
+    if (Test_buildAutomate)
+    {
+        std::cout << "Test №9 passed\n";
+    }
+    else {
+        std::cout << "Test №9 failed\n";
+    }
+
+    if (Test_findMinDist)
+    {
+        std::cout << "Test №10 passed\n";
+    }
+    else {
+        std::cout << "Test №10 failed\n";
+    }
+
+    if (Test_findGoodVertices)
+    {
+        std::cout << "Test №11 passed\n";
+    }
+    else {
+        std::cout << "Test №11 failed\n";
+    }
 }
 #endif
 
