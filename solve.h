@@ -38,74 +38,13 @@ public:
     }
 };
 
-void allGood(Automate automate, char symbol, int count, int vert, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been);
 Automate buildAutomate(std::string expression);
+void allGood(Automate automate, char symbol, int count, int vert, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been);
 bool canGetPrefix(int n, int cur, Automate automate, char symbol);
 std::vector<size_t> findGoodVertices(Automate automate, int count, char symbol); 
 bool can_get_terminate_eps(Automate automate, int vert, std::unordered_set<int> &been_to_eps);
 std::vector<size_t> findMinDist(int start, Automate automate, std::vector<size_t> answer_vertices);
 size_t Answer(std::string expression, char symbol, int count);
-void dump(Automate automate);
-
-bool can_get_terminate_eps(Automate automate, int vert, std::unordered_set<int> &been_to_eps) 
-{
-    auto it = automate.vertices.begin();
-    std::advance(it, static_cast<size_t>(vert));   
-
-    bool can_get = false;
-
-    for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
-        {
-            if (map_it->first == 'e')
-            {
-                for (auto &el : map_it->second)
-                {
-                    if (el == automate.get_terminal()) 
-                        return true;
-                    
-                    
-
-                    if (!been_to_eps.contains(el))
-                    {
-                        been_to_eps.insert(el);
-                        can_get = can_get_terminate_eps(automate, el, been_to_eps);
-                    }
-                }
-                break;
-            }
-        }
-    return can_get;
-}
-
-size_t Answer(std::string expression, char symbol, int count)
-{
-    size_t answer = 0;
-    Automate automate = buildAutomate(expression);
-    int finish_vertex = automate.get_terminal();
-
-    dump(automate);
-
-    std::vector<size_t> answer_vertices = findGoodVertices(automate, count, symbol);
-
-    int min = INT32_MAX;
-    if (answer_vertices.size() == 0)
-    {
-        return 0;
-    }
-    else 
-    {
-        std::vector<size_t> dist = findMinDist( 0, automate, answer_vertices);
-        for (int i = 0; i < answer_vertices.size(); ++i)
-        {
-            if (dist[answer_vertices[i]] < min)
-            {
-                min = dist[answer_vertices[i]];
-            }
-        }
-    }
-
-    return min + count;
-}
 
 Automate buildAutomate(std::string expression)
 {
@@ -142,6 +81,63 @@ Automate buildAutomate(std::string expression)
     }
 
     return builder.top();
+}
+
+bool can_get_terminate_eps(Automate automate, int vert, std::unordered_set<int> &been_to_eps) 
+{
+    auto it = automate.vertices.begin();
+    std::advance(it, static_cast<size_t>(vert));   
+
+    bool can_get = false;
+
+    for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
+        {
+            if (map_it->first == 'e')
+            {
+                for (auto &el : map_it->second)
+                {
+                    if (el == automate.get_terminal()) 
+                        return true;
+                    
+                    
+
+                    if (!been_to_eps.contains(el))
+                    {
+                        been_to_eps.insert(el);
+                        can_get = can_get_terminate_eps(automate, el, been_to_eps);
+                    }
+                }
+                break;
+            }
+        }
+    return can_get;
+}
+
+size_t Answer(Automate automate, char symbol, int count)
+{
+    size_t answer = 0;
+    int finish_vertex = automate.get_terminal();
+
+    std::vector<size_t> answer_vertices = findGoodVertices(automate, count, symbol);
+
+    int min = INT32_MAX;
+    if (answer_vertices.size() == 0)
+    {
+        return 0;
+    }
+    else 
+    {
+        std::vector<size_t> dist = findMinDist( 0, automate, answer_vertices);
+        for (int i = 0; i < answer_vertices.size(); ++i)
+        {
+            if (dist[answer_vertices[i]] < min)
+            {
+                min = dist[answer_vertices[i]];
+            }
+        }
+    }
+
+    return min + count;
 }
 
 void allGood(Automate automate, char symbol, int count, int vert, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
@@ -218,34 +214,6 @@ std::vector<size_t> findGoodVertices(Automate automate, int count, char symbol)
         }
     }
     return answer_vertices;
-}
-
-void dump(Automate automate) 
-{
-    std::ofstream out("dump.dot");
-    out << "digraph {\n";
-    out << "rankdir=\"LR\";\n";
-
-    auto it = automate.vertices.begin();
-    for (int i = 0; it != automate.vertices.end(); ++it, ++i)
-    {
-        out << "node" << i << "[label=\"" << i << "\"];\n";
-    }
-
-    it = automate.vertices.begin();
-
-    for (int i = 0; it != automate.vertices.end(); ++it, ++i)
-    {
-        for (auto &[key, value] : *it)
-        {
-            for (auto &idx : value)
-            {
-                out << "node" << i << " -> node" << idx << "[label=\"" << key << "\"];\n";
-            }
-        }
-    }
-    out << "}\n";
-    out.close();
 }
 
 std::vector<size_t> findMinDist(int start, Automate automate, std::vector<size_t> answer_vertices)

@@ -188,6 +188,7 @@ bool Test_Answer()
         size_t res;
     };
     
+    std::vector<Automate> automate(6);
     std::vector<test> all_tests(6);
     all_tests[0] = {"ac.aa.+", 'a', 2, 2};
     all_tests[1] = {"acb..bab.c.*.ab.ba.+.+*a.", 'a', 2, 4};
@@ -196,8 +197,8 @@ bool Test_Answer()
     all_tests[4] = {"acb.+*cb.+a.", 'a', 2, 2};
     all_tests[5] = {"ab+c.aba.*.bac.+.+*", 'b', 2, 0};
     for (int i = 0; i < all_tests.size(); ++i)
-    {
-        if (Answer(all_tests[i].expression, all_tests[i].x, all_tests[i].k) != all_tests[i].res)
+    {   automate[i] = buildAutomate(all_tests[i].expression);
+        if (Answer(automate[i], all_tests[i].x, all_tests[i].k) != all_tests[i].res)
         {
             return false;
         }
@@ -339,4 +340,21 @@ bool Test_findGoodVertices()
     return true;
 }
 
+bool Test_canGetPrefix()
+{
+    Automate automate_one = buildAutomate("ab+c.cb.+c.");
+    size_t count_one = 2;
+    char symbol_one = 'c'; 
+    bool answer_one = canGetPrefix(2, 0, automate_one, 'c') == true;
+
+    Automate automate_two = buildAutomate("ab.");
+    size_t count_two = 1;
+    char symbol_two = 'c'; 
+    bool answer_two = canGetPrefix(2, 0, automate_two, 'c') == false;
+    if (answer_two == answer_one && answer_two == 1)
+    {
+        return true;
+    }
+    return false;
+}
 #endif

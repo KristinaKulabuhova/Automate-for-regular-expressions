@@ -27,6 +27,7 @@ bool IsCorrectRegularExpression(std::string regular)
     return counter == 1;
 }
 
+Automate::Automate() = default;
 Automate::Automate(const char symbol)
 {
     vertices = {

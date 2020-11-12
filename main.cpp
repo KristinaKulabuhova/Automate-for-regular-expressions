@@ -97,8 +97,44 @@ void Test()
     else {
         std::cout << "Test №11 failed\n";
     }
+
+    if (Test_canGetPrefix)
+    {
+        std::cout << "Test №12 passed\n";
+    }
+    else {
+        std::cout << "Test №12 failed\n";
+    }
 }
 #endif
+
+void dump(Automate automate) 
+{
+    std::ofstream out("dump.dot");
+    out << "digraph {\n";
+    out << "rankdir=\"LR\";\n";
+
+    auto it = automate.vertices.begin();
+    for (int i = 0; it != automate.vertices.end(); ++it, ++i)
+    {
+        out << "node" << i << "[label=\"" << i << "\"];\n";
+    }
+
+    it = automate.vertices.begin();
+
+    for (int i = 0; it != automate.vertices.end(); ++it, ++i)
+    {
+        for (auto &[key, value] : *it)
+        {
+            for (auto &idx : value)
+            {
+                out << "node" << i << " -> node" << idx << "[label=\"" << key << "\"];\n";
+            }
+        }
+    }
+    out << "}\n";
+    out.close();
+}
 
 int main()
 {
@@ -118,7 +154,12 @@ int main()
         throw IncorrectRegularExpression();
     }
 
-    size_t answer = Answer(expression, x, k);
+    Automate automate = buildAutomate(expression);
+    size_t answer = Answer(automate, x, k);
+
+    #ifdef DUMP
+    dump(automate);
+    #endif
 
     if (answer == 0)
     {

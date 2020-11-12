@@ -25,7 +25,8 @@ private:
 
 public:
     Verts vertices;
-
+    
+    Automate();
     Automate(const char symbol);
     Automate(size_t n, size_t idx, Verts other);
     Automate(const Automate& other);
