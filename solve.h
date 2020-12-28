@@ -132,18 +132,16 @@ int Answer(Automate automate, Transition transition)
     {
         return 0;
     }
-    else 
+    
+    std::vector<int> dist = findMinDist( 0, automate, answer_vertices);
+    for (int i = 0; i < answer_vertices.size(); ++i)
     {
-        std::vector<int> dist = findMinDist( 0, automate, answer_vertices);
-        for (int i = 0; i < answer_vertices.size(); ++i)
+        if (dist[answer_vertices[i]] < min)
         {
-            if (dist[answer_vertices[i]] < min)
-            {
-                min = dist[answer_vertices[i]];
-            }
+            min = dist[answer_vertices[i]];
         }
     }
-
+    
     return min + transition.count;
 }
 
@@ -155,50 +153,43 @@ void allGood(Automate automate, Transition transition, std::unordered_set<int> &
         {
             been.insert(BeenData(transition.count, transition.vert));
             good_vert.insert(transition.vert);
+            return;
         } 
-        else 
+
+        std::unordered_set<int> been_to_eps;
+        if (can_get_terminate_eps(automate, transition.vert, been_to_eps))
         {
-            std::unordered_set<int> been_to_eps;
-            if (can_get_terminate_eps(automate, transition.vert, been_to_eps))
-            {
-                good_vert.insert(transition.vert);
-            }
+            good_vert.insert(transition.vert);
         }
         been.insert(BeenData(transition.count, transition.vert));
+        return;
     } 
-    else 
+
+    auto it = automate.vertices.begin();
+    std::advance(it, static_cast<int>(transition.vert));
+
+    for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
     {
-        auto it = automate.vertices.begin();
-        std::advance(it, static_cast<int>(transition.vert));
-
-        for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
+        if (map_it->first == 'e')
         {
-            if (map_it->first == 'e')
+            for (auto &el : map_it->second)
             {
-                for (auto &el : map_it->second)
-                {
-                    if (!been.contains(BeenData(transition.count, el)))
-                    {
-                        been.insert({transition.count, el});
-                        allGood(automate, {transition.symbol, transition.count, el}, good_vert, been);
-                    }
-                }
+                if (been.contains(BeenData(transition.count, el))) {continue;}
+                been.insert({transition.count, el});
+                allGood(automate, {transition.symbol, transition.count, el}, good_vert, been);
             }
+        }
 
-            if (map_it->first == transition.symbol)
+        if (map_it->first == transition.symbol)
+        {
+            for (auto &el : map_it->second)
             {
-                for (auto &el : map_it->second)
-                {
-                    if (!been.contains(BeenData(transition.count - 1, el)))
-                    {
-                        been.insert({transition.count, el});
-                        allGood(automate, {transition.symbol, transition.count - 1, el}, good_vert, been);
-                    }
-                }
+                if (been.contains(BeenData(transition.count - 1, el))) {continue;}
+                been.insert({transition.count, el});
+                allGood(automate, {transition.symbol, transition.count - 1, el}, good_vert, been);
             }
         }
     }
-
 }
 
 bool canGetPrefix(int count, int cur, Automate automate, char symbol)
