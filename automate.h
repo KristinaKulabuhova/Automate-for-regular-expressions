@@ -9,7 +9,7 @@
 #include <unordered_map>
 #include <stack>
 
-using Verts = std::list<std::unordered_map<char, std::list<size_t>>>;
+using Verts = std::list<std::unordered_map<char, std::list<int>>>;
 
 class IncorrectRegularExpression
 {
@@ -20,15 +20,15 @@ public:
 class Automate
 {
 private:
-    size_t n_vertices;
-    size_t term_idx;
+    int n_vertices;
+    int term_idx;
 
 public:
     Verts vertices;
     
     Automate();
     Automate(const char symbol);
-    Automate(size_t n, size_t idx, Verts other);
+    Automate(int n, int idx, Verts other);
     Automate(const Automate& other);
 
     Automate invert();
@@ -39,12 +39,12 @@ public:
     void concatenation(Automate &other);
     void closure();
     
-    Automate &operator+=(size_t n);
+    Automate &operator+=(int n);
 
     void mergeVertices(Verts &first, Verts &second);
 
-    size_t get_number_of_vertices() const;
-    size_t get_terminal() const;
+    int get_number_of_vertices() const;
+    int get_terminal() const;
 
     friend bool Test_concatenation();
     friend bool equal_automate(Automate first, Automate second);

@@ -50,8 +50,8 @@ bool Test_concatenation()
          {{'e', {2}}},
          {{'b', {3}}},
          {{'e', {}}}};
-    size_t n_vertices = 4;
-    size_t term_idx = 3;
+    int n_vertices = 4;
+    int term_idx = 3;
 
     Automate result(n_vertices, term_idx, answer);
 
@@ -72,8 +72,8 @@ bool Tets_operator_plus()
          {{'b', {4}}},
          {{'e', {5}}},
          {{'e', {}}}};
-    size_t n_vertices = 6;
-    size_t term_idx = 5;
+    int n_vertices = 6;
+    int term_idx = 5;
 
     Automate result(n_vertices, term_idx, answer);
 
@@ -91,8 +91,8 @@ bool Test_closure()
          {{'a', {2}}},
          {{'e', {3}}},
          {{'e', {0}}}};
-    size_t n_vertices = 4;
-    size_t term_idx = 3;
+    int n_vertices = 4;
+    int term_idx = 3;
 
     Automate result(n_vertices, term_idx, answer);
 
@@ -108,8 +108,8 @@ bool Test_get_number_of_vertices()
          {{'b', {4}}},
          {{'e', {5}}},
          {{'e', {}}}};
-    size_t n_vertices = 6;
-    size_t term_idx = 5;
+    int n_vertices = 6;
+    int term_idx = 5;
 
     Automate result(n_vertices, term_idx, answer);
     if (n_vertices == answer.size())
@@ -130,8 +130,8 @@ bool Test_operator_plus()
     Verts answer = {
          {{'a', {3}}},
          {{'e', {}}}};
-    size_t n_vertices = 2;
-    size_t term_idx = 3;
+    int n_vertices = 2;
+    int term_idx = 3;
 
     Automate result(n_vertices, term_idx, answer);
 
@@ -184,8 +184,8 @@ bool Test_Answer()
     {
         std::string expression;
         char x;
-        size_t k;
-        size_t res;
+        int k;
+        int res;
     };
     
     std::vector<Automate> automate(6);
@@ -198,7 +198,7 @@ bool Test_Answer()
     all_tests[5] = {"ab+c.aba.*.bac.+.+*", 'b', 2, 0};
     for (int i = 0; i < all_tests.size(); ++i)
     {   automate[i] = buildAutomate(all_tests[i].expression);
-        if (Answer(automate[i], all_tests[i].x, all_tests[i].k) != all_tests[i].res)
+        if (Answer(automate[i], {all_tests[i].x, all_tests[i].k, 0}) != all_tests[i].res)
         {
             return false;
         }
@@ -215,8 +215,8 @@ bool Test_buildAutomate()
          {{'b', {4}}},
          {{'e', {5}}},
          {{'e', {}}}};
-    size_t n_vertices = 6;
-    size_t term_idx = 5;
+    int n_vertices = 6;
+    int term_idx = 5;
 
     Automate result_one(n_vertices, term_idx, answer);
 
@@ -279,12 +279,12 @@ bool Test_findMinDist()
     Automate new_automate = buildAutomate("ab.c+*");
     struct edge
     {
-        size_t begin;
-        size_t end;
-        size_t cost;
+        int begin;
+        int end;
+        int cost;
     };
-    std::vector<size_t> dist_vertices(10);
-    std::vector<size_t> answer_vertices(10);
+    std::vector<int> dist_vertices(10);
+    std::vector<int> answer_vertices(10);
     std::vector<edge> edges;
 
     edges.push_back({0, 1, 0});
@@ -324,11 +324,11 @@ bool Test_findMinDist()
 
 bool Test_findGoodVertices()
 {
-    std::vector<size_t> real = {0, 1, 2, 3, 4, 5, 6, 7};
+    std::vector<int> real = {0, 1, 2, 3, 4, 5, 6, 7};
     Automate automate = buildAutomate("ab+c.cb.+c.");
-    size_t count = 2;
+    int count = 2;
     char symbol = 'c'; 
-    std::vector<size_t> answers = findGoodVertices(automate, count, symbol);
+    std::vector<int> answers = findGoodVertices(automate, {symbol, count, 0});
     std::sort(answers.begin(), answers.end());
     for (int i = 0; i < answers.size(); ++i)
     {
@@ -343,12 +343,12 @@ bool Test_findGoodVertices()
 bool Test_canGetPrefix()
 {
     Automate automate_one = buildAutomate("ab+c.cb.+c.");
-    size_t count_one = 2;
+    int count_one = 2;
     char symbol_one = 'c'; 
     bool answer_one = canGetPrefix(2, 0, automate_one, 'c') == true;
 
     Automate automate_two = buildAutomate("ab.");
-    size_t count_two = 1;
+    int count_two = 1;
     char symbol_two = 'c'; 
     bool answer_two = canGetPrefix(2, 0, automate_two, 'c') == false;
     if (answer_two == answer_one && answer_two == 1)

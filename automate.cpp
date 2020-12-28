@@ -36,7 +36,7 @@ Automate::Automate(const char symbol)
     n_vertices = 2;
     term_idx = 1;
 }
-Automate::Automate(size_t n, size_t idx, Verts other)
+Automate::Automate(int n, int idx, Verts other)
 {
     auto other_it = other.begin();
     for (; other_it != other.end(); ++other_it)
@@ -97,7 +97,7 @@ void Automate::mergeVertices(Verts &first, Verts &second)
     }
 }
 
-Automate &Automate::operator+=(size_t n)
+Automate &Automate::operator+=(int n)
 {
     for (auto &el : vertices)
     {
@@ -113,12 +113,12 @@ Automate &Automate::operator+=(size_t n)
     return *this;
 }
 
-size_t Automate::get_terminal() const
+int Automate::get_terminal() const
 {
     return term_idx;
 }
 
-size_t Automate::get_number_of_vertices() const
+int Automate::get_number_of_vertices() const
 {
     return this->get_terminal() + 1;
 }

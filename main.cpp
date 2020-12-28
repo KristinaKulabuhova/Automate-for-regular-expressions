@@ -158,7 +158,7 @@ int main()
     }
 
     Automate automate = buildAutomate(expression);
-    size_t answer = Answer(automate, x, k);
+    int answer = Answer(automate, {x, k, 0});
 
     if (answer == 0)
     {

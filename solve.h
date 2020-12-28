@@ -9,9 +9,16 @@
 #include "automate_builder.h"
 
 struct edge{
-    size_t begin;
-    size_t end;
-    size_t cost;
+    int begin;
+    int end;
+    int cost;
+};
+
+struct Transition
+{
+    char symbol; 
+    int count; 
+    int vert;
 };
 
 struct BeenData
@@ -32,19 +39,19 @@ bool operator==(const BeenData& first, const BeenData &second)
 class Hash
 {
 public:
-    size_t operator()(const BeenData &value) const
+    int operator()(const BeenData &value) const
     {
         return value.x + value.vert;
     }
 };
 
 Automate buildAutomate(std::string expression);
-void allGood(Automate automate, char symbol, int count, int vert, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been);
+void allGood(Automate automate, Transition transition, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been);
 bool canGetPrefix(int n, int cur, Automate automate, char symbol);
-std::vector<size_t> findGoodVertices(Automate automate, int count, char symbol); 
+std::vector<int> findGoodVertices(Automate automate, Transition transition); 
 bool can_get_terminate_eps(Automate automate, int vert, std::unordered_set<int> &been_to_eps);
-std::vector<size_t> findMinDist(int start, Automate automate, std::vector<size_t> answer_vertices);
-size_t Answer(std::string expression, char symbol, int count);
+std::vector<int> findMinDist(int start, Automate automate, std::vector<int> answer_vertices);
+int Answer(Automate automate, Transition transition);
 
 Automate buildAutomate(std::string expression)
 {
@@ -86,7 +93,7 @@ Automate buildAutomate(std::string expression)
 bool can_get_terminate_eps(Automate automate, int vert, std::unordered_set<int> &been_to_eps) 
 {
     auto it = automate.vertices.begin();
-    std::advance(it, static_cast<size_t>(vert));   
+    std::advance(it, static_cast<int>(vert));   
 
     bool can_get = false;
 
@@ -113,12 +120,12 @@ bool can_get_terminate_eps(Automate automate, int vert, std::unordered_set<int> 
     return can_get;
 }
 
-size_t Answer(Automate automate, char symbol, int count)
+int Answer(Automate automate, Transition transition)
 {
-    size_t answer = 0;
+    int answer = 0;
     int finish_vertex = automate.get_terminal();
 
-    std::vector<size_t> answer_vertices = findGoodVertices(automate, count, symbol);
+    std::vector<int> answer_vertices = findGoodVertices(automate, {transition.symbol, transition.count, 0});
 
     int min = INT32_MAX;
     if (answer_vertices.size() == 0)
@@ -127,7 +134,7 @@ size_t Answer(Automate automate, char symbol, int count)
     }
     else 
     {
-        std::vector<size_t> dist = findMinDist( 0, automate, answer_vertices);
+        std::vector<int> dist = findMinDist( 0, automate, answer_vertices);
         for (int i = 0; i < answer_vertices.size(); ++i)
         {
             if (dist[answer_vertices[i]] < min)
@@ -137,32 +144,32 @@ size_t Answer(Automate automate, char symbol, int count)
         }
     }
 
-    return min + count;
+    return min + transition.count;
 }
 
-void allGood(Automate automate, char symbol, int count, int vert, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
+void allGood(Automate automate, Transition transition, std::unordered_set<int> &good_vert, std::unordered_set<BeenData, Hash> &been)
 {
-    if (count == 0)
+    if (transition.count == 0)
     {
-        if (vert == automate.get_terminal())
+        if (transition.vert == automate.get_terminal())
         {
-            been.insert(BeenData(count, vert));
-            good_vert.insert(vert);
+            been.insert(BeenData(transition.count, transition.vert));
+            good_vert.insert(transition.vert);
         } 
         else 
         {
             std::unordered_set<int> been_to_eps;
-            if (can_get_terminate_eps(automate, vert, been_to_eps))
+            if (can_get_terminate_eps(automate, transition.vert, been_to_eps))
             {
-                good_vert.insert(vert);
+                good_vert.insert(transition.vert);
             }
         }
-        been.insert(BeenData(count, vert));
+        been.insert(BeenData(transition.count, transition.vert));
     } 
     else 
     {
         auto it = automate.vertices.begin();
-        std::advance(it, static_cast<size_t>(vert));
+        std::advance(it, static_cast<int>(transition.vert));
 
         for (auto map_it = (*it).begin(); map_it != (*it).end(); ++map_it)
         {
@@ -170,22 +177,22 @@ void allGood(Automate automate, char symbol, int count, int vert, std::unordered
             {
                 for (auto &el : map_it->second)
                 {
-                    if (!been.contains(BeenData(count, el)))
+                    if (!been.contains(BeenData(transition.count, el)))
                     {
-                        been.insert({count, el});
-                        allGood(automate, symbol, count, el, good_vert, been);
+                        been.insert({transition.count, el});
+                        allGood(automate, {transition.symbol, transition.count, el}, good_vert, been);
                     }
                 }
             }
 
-            if (map_it->first == symbol)
+            if (map_it->first == transition.symbol)
             {
                 for (auto &el : map_it->second)
                 {
-                    if (!been.contains(BeenData(count - 1, el)))
+                    if (!been.contains(BeenData(transition.count - 1, el)))
                     {
-                        been.insert({count, el});
-                        allGood(automate, symbol, count - 1, el, good_vert, been);
+                        been.insert({transition.count, el});
+                        allGood(automate, {transition.symbol, transition.count - 1, el}, good_vert, been);
                     }
                 }
             }
@@ -198,35 +205,35 @@ bool canGetPrefix(int count, int cur, Automate automate, char symbol)
 {
     std::unordered_set<int> good_vert;
     std::unordered_set<BeenData, Hash> been;
-    allGood(automate, symbol, count, cur, good_vert, been);
+    allGood(automate, {symbol, count, cur}, good_vert, been);
 
     return good_vert.size() != 0;
 }
 
-std::vector<size_t> findGoodVertices(Automate automate, int count, char symbol)
+std::vector<int> findGoodVertices(Automate automate, Transition transition)
 {
-    std::vector<size_t> answer_vertices;
+    std::vector<int> answer_vertices;
     for (int i = 0; i < automate.get_number_of_vertices(); ++i)
     {
-        if (canGetPrefix(count, i, automate, symbol))
+        if (canGetPrefix(transition.count, i, automate, transition.symbol))
         {
             answer_vertices.push_back(i);
         }
     }
-    return answer_vertices;
+    return answer_vertices; 
 }
 
-std::vector<size_t> findMinDist(int start, Automate automate, std::vector<size_t> answer_vertices)
+std::vector<int> findMinDist(int start, Automate automate, std::vector<int> answer_vertices)
 {
     std::vector<edge> edges;
-    size_t i = 0;
-    size_t cost;
+    int i = 0;
+    int cost;
     for (auto it = automate.vertices.begin(); it != automate.vertices.end(); ++it, ++i)
     {
-        for (auto &[key, value] : *it)
+        for (auto &[letter, vertex] : *it)
         {
-            cost = (key == 'e') ? 0 : 1;
-            for (size_t &idx : value)
+            cost = (letter == 'e') ? 0 : 1;
+            for (int &idx : vertex)
             {
                 edges.push_back({i, idx, cost});
             }
@@ -234,7 +241,7 @@ std::vector<size_t> findMinDist(int start, Automate automate, std::vector<size_t
     }
 
     const int INF = INT32_MAX;
-    std::vector<size_t> dist(automate.get_number_of_vertices(), INF);
+    std::vector<int> dist(automate.get_number_of_vertices(), INF);
     dist[start] = 0;
     for(int i = 0; i < automate.get_number_of_vertices() - 1; ++i)
     {

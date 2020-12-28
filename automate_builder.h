@@ -17,7 +17,7 @@ public:
 
     Automate top();
 
-    friend bool Test_operator_plus(size_t n);
+    friend bool Test_operator_plus(int n);
 };
 
 #endif
